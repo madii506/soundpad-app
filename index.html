@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<title>Soundpad</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="every ticker has a sound. Launch a coin on pump.fun and it drops its own track: the ticker, played as music.">
+<meta name="theme-color" content="#111113">
+<meta property="og:title" content="Soundpad">
+<meta property="og:description" content="every ticker has a sound.">
+<meta property="og:image" content="https://soundpad-app.vercel.app/assets/img/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico?v=1" sizes="any">
+<link rel="icon" type="image/png" sizes="64x64" href="/assets/img/fav-64.png?v=1">
+<link rel="apple-touch-icon" href="/assets/img/fav-180.png?v=1">
+<link rel="preload" href="/assets/fonts/SpaceGrotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/css/sp.css?v=1">
+</head>
+<body>
+<header class="bar" id="top">
+  <a class="brand" href="#" aria-label="Soundpad, to the top"><img src="/assets/img/pfp.webp" alt="" width="30" height="30"><span>soundpad</span></a>
+  <nav class="links" aria-label="Sections"><a href="#classics">Classics</a><a href="#studio">Studio</a><a href="#chart">Chart</a><a href="#radio">Radio</a><a href="#listeners">Listeners</a><a href="#notes">Notes</a></nav>
+  <div class="right">
+    <button class="now" id="now" type="button" hidden><i class="eq"><b></b><b></b><b></b></i><span id="nowTxt"></span><em>stop</em></button>
+    <button class="wallet" id="walletBtn" type="button"><i></i><span>connect</span></button>
+  </div>
+</header>
+
+<main>
+  <section class="hero" id="hero">
+    <div class="rings" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <img class="woof wl" src="/assets/img/woofer.webp" alt="" width="560" height="560">
+    <img class="woof wr" src="/assets/img/woofer.webp" alt="" width="560" height="560">
+    <div class="hmid">
+      <p class="kick"><i id="kDot"></i><span id="kTxt">$SOUNDPAD · a launchpad you can hear</span></p>
+      <div class="pads big" id="heroPads" aria-label="Press the pads"></div>
+      <h1 class="hl">every ticker has a sound.</h1>
+      <p class="hsub">Launch a coin on pump.fun and it drops its own track: every letter of the ticker is a note, played as real music right in your browser. Download it, post it, climb the chart.</p>
+      <div class="hcta"><button class="btn acc big" id="heroPlay" type="button"><span class="pi">▶</span><span>Play $SOUNDPAD</span></button><a class="btn line big" href="#studio">Type your ticker</a></div>
+      <div class="ca" id="caBox" hidden></div>
+    </div>
+    <div class="tape" aria-label="Coins and their sounds"><div class="tapein" id="tape"></div></div>
+  </section>
+
+  <section class="side" id="classics">
+    <div class="wrap">
+      <div class="trk"><b>A1</b><h2>The classics</h2><span>you know these tickers. now hear them</span></div>
+      <div class="crates" id="crates"></div>
+    </div>
+  </section>
+
+  <section class="side alt" id="studio">
+    <div class="wrap">
+      <div class="trk"><b>A2</b><h2>The studio</h2><span>type a ticker, hear it, release it</span></div>
+      <div class="studio">
+        <div class="toy">
+          <label class="tkl" for="tk">ticker</label>
+          <div class="tkw"><span>$</span><input id="tk" maxlength="10" placeholder="YOURS" spellcheck="false" autocomplete="off" autocapitalize="characters"></div>
+          <div class="pads row" id="sPads"></div>
+          <p class="smeta" id="sMeta"></p>
+          <div class="chips" id="styles"><button type="button" class="chip on" data-s="trap"><i></i>trap</button><button type="button" class="chip" data-s="house"><i></i>house</button><button type="button" class="chip" data-s="lofi"><i></i>lo-fi</button><button type="button" class="chip" data-s="chip"><i></i>8-bit</button><button type="button" class="chip ghost" id="remix">new mix ↻</button></div>
+          <canvas class="viz" id="sViz" aria-hidden="true"></canvas>
+          <div class="acts"><button class="btn acc" id="sPlay" type="button"><span class="pi">▶</span><span class="lab">Play</span></button><button class="btn" id="sMp3" type="button"><span class="lab">⬇ mp3</span></button><button class="btn" id="sVid" type="button"><span class="lab">⬇ video for X</span></button></div>
+          <p class="status" id="sSt" role="status"></p>
+        </div>
+        <div class="lform">
+          <h3>Release it on pump.fun</h3>
+          <label class="fld"><span>name</span><input class="in" id="nm" maxlength="32" placeholder="Wick" spellcheck="false"></label>
+          <label class="fld"><span>what is it</span><textarea class="in" id="line" maxlength="300" rows="2" placeholder="a frog who reviews energy drinks at 3am"></textarea></label>
+          <label class="fld"><span>first track title <em>optional</em></span><input class="in" id="ttl" maxlength="60" placeholder="3am in the trenches (intro)" spellcheck="false"></label>
+          <label class="fld"><span>its X <em>optional</em></span><input class="in" id="xh" maxlength="16" placeholder="@" spellcheck="false"></label>
+          <div class="fld"><span>first buy <em>optional</em></span><div class="chips" id="buyBox"></div></div>
+          <div class="fld"><span>royalties, locked on pump.fun</span><div class="split" id="split"></div></div>
+          <button class="btn acc big wide" id="goBtn" type="button">Connect wallet to launch</button>
+          <div class="lsteps" id="goProg" hidden></div>
+          <p class="status" id="goStatus" role="status"></p>
+          <div id="goRes" hidden></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="side" id="chart">
+    <div class="wrap">
+      <div class="trk"><b>A3</b><h2>The chart</h2><span>every coin launched here, as a track</span></div>
+      <div class="tabs" id="sorts"><button type="button" data-s="hot" class="on">Hot</button><button type="button" data-s="new">New</button><button type="button" data-s="likes">Most liked</button></div>
+      <ol class="tracks" id="tracks"></ol>
+    </div>
+  </section>
+
+  <section class="side alt" id="radio">
+    <div class="wrap">
+      <div class="trk"><b>B1</b><h2>Radio</h2><span>every new coin on pump.fun, played the second it’s born</span></div>
+      <div class="radio">
+        <div class="onair">
+          <button class="rbtn" id="radioBtn" type="button" aria-pressed="false"><i></i><span>Turn on the radio</span></button>
+          <div class="rhead"><div class="rec big" id="rRec"><span class="lbl"></span></div><div class="rnow"><small id="rLab">waiting for the next coin</small><b id="rSym">—</b><span id="rName"></span></div></div>
+          <div class="pads row sm" id="rPads"></div>
+          <p class="rc"><b id="bornN">0</b> coins born on pump.fun since you got here</p>
+        </div>
+        <ul class="births" id="births"><li class="mut">Connecting to pump.fun…</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="side" id="listeners">
+    <div class="wrap">
+      <div class="trk"><b>B2</b><h2>Listeners</h2><span>hold the right ticker, get paid by every new one</span></div>
+      <p class="lede">Burn $SOUNDPAD to become a listener. Every new coin launched here draws 8 first listeners, and the longer you’ve listened, the more tickets you get. First listeners share 15% of that coin’s creator fees forever, paid by pump.fun’s own fee sharing.</p>
+      <div class="ladder" id="ladder"></div>
+      <div class="vgrid"><div class="card" id="me"></div><div class="card" id="vtop"></div></div>
+    </div>
+  </section>
+
+  <section class="side alt" id="notes">
+    <div class="wrap">
+      <div class="trk"><b>B3</b><h2>Liner notes</h2><span>how it works, credited properly</span></div>
+      <dl class="credits">
+        <div><dt>Written by</dt><dd>your ticker. Every letter is a note of the coin’s key: A is the first note, B the second, and so on, each one landing as close as it can to the one before.</dd></div>
+        <div><dt>Produced by</dt><dd>your browser. No samples and no server: every kick, chord and bell is synthesized live, so the same ticker always makes the same track.</dd></div>
+        <div><dt>Released on</dt><dd>pump.fun, from your own wallet, in one signature. The track’s cover is made from its own notes.</dd></div>
+        <div><dt>Royalties</dt><dd>70% to you, 15% to eight first listeners, 15% to the house. Locked into pump.fun’s fee sharing in the same signature that creates the coin.</dd></div>
+        <div><dt>New tracks</dt><dd>every six hours while it trades, the coin drops a new mix and an AI gives it a title. Comment on a coin and it answers.</dd></div>
+        <div><dt>The chart</dt><dd>every hour the most liked track of the last six hours goes to number one.</dd></div>
+        <div><dt>Mastered for</dt><dd>X and TikTok. Every track downloads as an mp3 and as a vertical video with its pads lighting up.</dd></div>
+      </dl>
+      <div class="splitx"><div><b>70%</b><span>you</span></div><div><b>15%</b><span>8 first listeners</span></div><div><b>15%</b><span>the house</span></div></div>
+      <div class="faq">
+        <details><summary>Who holds the money?</summary><p>Nobody here. pump.fun’s own fee sharing splits every creator fee, locked in the same signatures that create the coin. Before you sign, the page reads the transactions and stops if the split isn’t the one shown. Anyone can push waiting fees out to everyone with one click.</p></details>
+        <details><summary>How are first listeners drawn?</summary><p>The moment a coin is recorded, up to 8 $SOUNDPAD listeners are drawn, seeded by Solana’s latest finalized blockhash. Tickets: new 1x, regular 1.5x (day 3), superfan 2x (day 10), day one 3x (day 30). Until anyone has joined, the listeners’ 15% stays with the launcher.</p></details>
+        <details><summary>What if a listener sells?</summary><p>They stop listening. If a wallet’s $SOUNDPAD drops below what it held right after joining, it leaves the draw. Coins it was already a first listener of keep paying it.</p></details>
+        <details><summary>Can I post the tracks?</summary><p>Yes. Every track downloads as an mp3 and as a vertical video, both made in your browser. X takes the video; use the mp3 anywhere else.</p></details>
+        <details><summary>Does a ticker always sound the same?</summary><p>Its notes never change: they come from the letters. The key, the chords and the style come from the coin’s mix, so every new drop is a new version of the same melody.</p></details>
+        <details><summary>When does a coin go quiet?</summary><p>Six hours without a trade and it goes quiet. A week without a trade and it’s dead. One trade brings it back.</p></details>
+      </div>
+    </div>
+  </section>
+</main>
+<span id="live-sr" class="sr" aria-live="polite"></span>
+<div class="sheet-w" id="sheet" hidden><div class="boxw" role="dialog" aria-modal="true" aria-labelledby="sheetTitle"><div class="bar2"><span id="sheetTitle"></span><button class="x" id="sheetX" type="button" aria-label="Close">×</button></div><div class="inner" id="sheetBody"></div></div></div>
+<div class="toast" id="toast" role="status"></div>
+<script src="/assets/js/core.js?v=1"></script>
+<script src="/assets/js/live.js?v=1"></script>
+<script src="/assets/js/snd.js?v=1"></script>
+<script src="/assets/js/cross.js?v=1"></script>
+<script src="/assets/js/app.js?v=1"></script>
+</body>
+</html>

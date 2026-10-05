@@ -1,0 +1,20 @@
+{
+  "cleanUrls": true,
+  "functions": {
+    "api/cycle.js": { "maxDuration": 60 },
+    "api/settle.js": { "maxDuration": 45 },
+    "api/meta.js": { "maxDuration": 30 },
+    "api/talk.js": { "maxDuration": 40 },
+    "api/*.js": { "maxDuration": 30 }
+  },
+  "rewrites": [
+    { "source": "/c/:mint", "destination": "/index.html" },
+    { "source": "/m/:id", "destination": "/api/meta?id=:id" },
+    { "source": "/i/:mint", "destination": "/api/meta?img=:mint" }
+  ],
+  "headers": [
+    { "source": "/assets/fonts/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }] },
+    { "source": "/assets/(css|js|img)/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=60, must-revalidate" }] },
+    { "source": "/(.*)", "headers": [{ "key": "X-Content-Type-Options", "value": "nosniff" }, { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }] }
+  ]
+}
