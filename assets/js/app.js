@@ -358,7 +358,7 @@
     try { const ms = Snd.motif(o, i => flash(rp, i, 220)); busy = Date.now() + ms; rr.classList.add('spin'); setTimeout(() => rr.classList.remove('spin'), ms); } catch {}
   }
   Live.on('status', up => {
-    $('#kDot').classList.toggle('on', up);
+    const kd = $('#kDot'); if (kd) kd.classList.toggle('on', up);
     if (!up && !S.born) births.innerHTML = '<li class="mut">pump.fun’s live feed is offline right now. New coins show up here when it’s back.</li>';
   });
   Live.on('birth', b => {
