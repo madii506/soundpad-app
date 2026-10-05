@@ -30,12 +30,23 @@
     if (!url) return pad();
     const im = new Image(); im.alt = ''; im.referrerPolicy = 'no-referrer'; im.decoding = 'async'; im.onerror = pad; im.src = url; l.appendChild(im);
   }
-  const logos = new Map();
-  function logoOf(b) {
-    if (!b.uri || !/^https:\/\//.test(b.uri)) return Promise.resolve(null);
-    if (!logos.has(b.mint)) logos.set(b.mint, C.get('/api/logos?uri=' + encodeURIComponent(b.uri)).then(j => (j && j.ok && j.image) || null).catch(() => null));
-    return logos.get(b.mint);
+  // real token pictures: Jupiter's token list (it lists new pump.fun coins within seconds), read in the browser
+  async function jup(mints) {
+    const ok = t => t && typeof t.icon === 'string' && /^https:\/\//.test(t.icon) ? t.icon : null;
+    try {
+      const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 8000);
+      const a = await fetch('https://lite-api.jup.ag/tokens/v2/search?query=' + mints.join(','), { signal: ctl.signal }).then(r => r.json()); clearTimeout(tm);
+      const out = {}; for (const t of Array.isArray(a) ? a : []) if (t && t.id) out[t.id] = { symbol: String(t.symbol || ''), name: String(t.name || ''), icon: ok(t) }; return out;
+    } catch { const j = await C.get('/api/logos?mints=' + mints.join(',')).catch(() => null); return (j && j.ok && j.tokens) || {}; }
   }
+  const waiting = new Map();                        // mint → { o, recs, tries }: new coins still waiting for their picture
+  const pics = new Map();
+  function wantPic(mint, o, rec) { rec.dataset.m = mint; if (pics.has(mint)) { label(rec, pics.get(mint), o); return; } const w = waiting.get(mint) || { o, recs: [], tries: 0 }; w.recs.push(rec); waiting.set(mint, w); }
+  setInterval(async () => {
+    if (document.hidden || !waiting.size) return;
+    const ms = [...waiting.keys()].slice(-20), got = await jup(ms);
+    ms.forEach(m => { const w = waiting.get(m); if (!w) return; const t = got[m]; if (t && t.icon) { pics.set(m, t.icon); w.recs.forEach(r => { if (r.isConnected && r.dataset.m === m) label(r, t.icon, w.o); }); waiting.delete(m); } else if (++w.tries > 6) waiting.delete(m); });
+  }, 7000);
 
   // ---------- pads ----------
   function pads(el, sym, o, lit) {
@@ -171,8 +182,7 @@
   async function classics() {
     const el = $('#crates');
     el.innerHTML = CLASSICS.map(([m, s], i) => { const o = classicOpt(m, s); return `<div class="crate" data-m="${m}" style="--i:${i}"><div class="stack"></div><div class="meta"><span style="--c:${COL[o.style]}"><i></i>${SL[o.style]} · ${Snd.describe(o).key}</span><button class="pl" type="button" aria-label="Play $${s}">▶</button></div></div>`; }).join('');
-    const j = await C.get('/api/logos?mints=' + CLASSICS.map(c => c[0]).join(',')).catch(() => null);
-    const tk = (j && j.ok && j.tokens) || {};
+    const tk = await jup(CLASSICS.map(c => c[0]));
     $$('.crate', el).forEach(card => {
       const m = card.dataset.m, s0 = CLASSICS.find(c => c[0] === m)[1], t = tk[m], url = t && t.icon && symOf(t.symbol) === s0 ? t.icon : null, o = classicOpt(m, s0);
       const st = card.querySelector('.stack'), r = recEl(); label(r, url, o); st.appendChild(r);
@@ -341,7 +351,7 @@
   };
   function onAir(b) {
     const o = anyOpt(b), rr = $('#rRec'); $('#rSym').textContent = '$' + o.symbol; $('#rName').textContent = b.name || ''; $('#rLab').textContent = 'just born on pump.fun';
-    pads(rp, o.symbol, o, true); label(rr, null, o); logoOf(b).then(u => { if (u && $('#rSym').textContent === '$' + o.symbol) label(rr, u, o); });
+    pads(rp, o.symbol, o, true); rr.dataset.m = b.mint; label(rr, pics.get(b.mint) || null, o); if (!pics.has(b.mint)) wantPic(b.mint, o, rr);
     $$('#births li').forEach(li => li.classList.toggle('on', li.dataset.m === b.mint));
     if (!S.radio || (Snd.playing() && VIEW && VIEW.btn && !VIEW.radio) || Date.now() < busy) return;
     try { const ms = Snd.motif(o, i => flash(rp, i, 220)); busy = Date.now() + ms; rr.classList.add('spin'); setTimeout(() => rr.classList.remove('spin'), ms); } catch {}
@@ -358,7 +368,7 @@
     li.innerHTML = `<div><b>$${esc(o.symbol)}</b><span>${esc(b.name || '')} · ${SL[o.style]}</span></div><a class="pl" href="https://pump.fun/coin/${esc(b.mint)}" target="_blank" rel="noopener" aria-label="Open on pump.fun">↗</a><button class="pl" type="button" aria-label="Play its track">▶</button>`;
     const r = recEl(); label(r, null, o); li.prepend(r);
     const tr = tapeAdd({ sym: o.symbol, sub: 'just born', url: null, o, fresh: true });
-    logoOf(b).then(u => { if (u) { label(r, u, o); label(tr, u, o); } });
+    wantPic(b.mint, o, r); wantPic(b.mint, o, tr);
     li.querySelector('button').onclick = e => playTrack(o, { pads: pads(rp, o.symbol, o, true), radio: true, recs: [r] }, e.currentTarget);
     births.prepend(li); while (births.children.length > 12) births.lastChild.remove();
     if (S.radio || !$('#rSym').textContent || $('#rSym').textContent === '—') onAir(b);
