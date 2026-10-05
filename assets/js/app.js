@@ -22,13 +22,14 @@
   // famous tickers, by their real addresses; their pictures come from Jupiter's token list at runtime
   const CLASSICS = [['DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263', 'BONK'], ['EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm', 'WIF'], ['7GCihgDB8fe6KNjn2MYtkzZcRjQy3t9GHdC8uHYmW2hr', 'POPCAT'], ['ED5nyyWEzpPPiWimP8vYm7sD7TD3LAt3Q3gRTWHzPJBY', 'MOODENG'], ['CzLSujWBLFsSjncfkh59rUFqvafWcY5tzedWJSuypump', 'GOAT'], ['2qEHjDLDLbuBgRYvsxhc5D6uDWAivNFZGan56P1tpump', 'PNUT'], ['9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump', 'FARTCOIN'], ['2zMMhcVQEXDtdE6vsFS7S7D5oUodfJHE8vd1gnBouauv', 'PENGU']];
   const classicOpt = (mint, sym) => ({ symbol: sym, style: STYLES[hashN(mint) % 4], seed: mint, title: 'what $' + sym + ' sounds like' });
+  const pic = url => '/api/logos?img=' + encodeURIComponent(url);     // every picture comes through this site, small and cached
   // a record: the coin's own picture is the label (or its pad, when there's no picture)
   function recEl(cls) { const d = document.createElement('div'); d.className = 'rec' + (cls ? ' ' + cls : ''); d.innerHTML = '<span class="lbl"></span>'; return d; }
   function label(el, url, o) {
     const l = el.querySelector('.lbl'); l.style.setProperty('--c', COL[o.style] || COL.trap); l.innerHTML = '';
     const pad = () => { l.innerHTML = ''; Snd.ready().then(() => l.appendChild(Snd.coverCanvas(o, 160))); };
     if (!url) return pad();
-    const im = new Image(); im.alt = ''; im.referrerPolicy = 'no-referrer'; im.decoding = 'async'; im.onerror = pad; im.src = url; l.appendChild(im);
+    const im = new Image(); im.alt = ''; im.decoding = 'async'; im.onerror = pad; im.src = pic(url); l.appendChild(im);
   }
   // real token pictures: Jupiter's token list (it lists new pump.fun coins within seconds), read in the browser
   async function jup(mints) {
@@ -188,7 +189,7 @@
       const st = card.querySelector('.stack'), r = recEl(); label(r, url, o); st.appendChild(r);
       const sl = document.createElement('div'); sl.className = 'sleeve';
       const art = () => Snd.ready().then(() => sl.prepend(Snd.coverCanvas(o, 400)));
-      if (url) { const im = new Image(); im.alt = '$' + s0; im.referrerPolicy = 'no-referrer'; im.decoding = 'async'; im.onerror = () => { im.remove(); const t = sl.querySelector('b'); if (t) t.remove(); art(); }; im.src = url; sl.appendChild(im); sl.insertAdjacentHTML('beforeend', `<b>$${esc(s0)}</b>`); } else art();
+      if (url) { const im = new Image(); im.alt = '$' + s0; im.decoding = 'async'; im.onerror = () => { im.remove(); const t = sl.querySelector('b'); if (t) t.remove(); art(); }; im.src = pic(url); sl.appendChild(im); sl.insertAdjacentHTML('beforeend', `<b>$${esc(s0)}</b>`); } else art();
       st.appendChild(sl);
       const go = () => playTrack(o, { recs: [r], card }, card.querySelector('.pl'));
       card.querySelector('.pl').onclick = e => { e.stopPropagation(); go(); };
