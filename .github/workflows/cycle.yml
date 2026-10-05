@@ -1,0 +1,10 @@
+name: cycle
+on:
+  schedule:
+    - cron: '19,49 * * * *'
+  workflow_dispatch:
+jobs:
+  cycle:
+    runs-on: ubuntu-latest
+    steps:
+      - run: curl -fsS --max-time 70 "https://soundpad-app.vercel.app/api/cycle" || true
